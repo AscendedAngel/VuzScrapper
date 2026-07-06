@@ -16,10 +16,14 @@ internal static class CompetitionResolver
 
     private static void Recycle(List<ApplicantGroupByType> groups, Competition competition)
     {
+        var ignoreId = new List<string>();
+
         foreach (var block in groups)
         {
             foreach (var candidate in block.CandidatesByType)
             {
+                if (ignoreId.Contains(candidate.Code)) continue;
+                
                 var isAdded = false;
 
                 foreach (var request in candidate.Applicants)
@@ -39,8 +43,9 @@ internal static class CompetitionResolver
                     if (predict)
                     {
                         currentList.Students.Add(request);
-                        competition.Candidates.RemoveAll(x => x.Code == candidate.Code);
+                        //competition.Candidates.RemoveAll(x => x.Code == candidate.Code);
                         isAdded = true;
+                        ignoreId.Add(candidate.Code);
                         break;
                     }
                 }
@@ -53,7 +58,8 @@ internal static class CompetitionResolver
                     currentList.Students.Add(request);
                 }
 
-                competition.Candidates.RemoveAll(x => x.Code == candidate.Code);
+                //competition.Candidates.RemoveAll(x => x.Code == candidate.Code);
+                ignoreId.Add(candidate.Code);
             }
         }
     }
