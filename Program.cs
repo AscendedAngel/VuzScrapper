@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Runtime.InteropServices;
 
 namespace ITMOScrapper;
 
@@ -66,6 +67,16 @@ internal sealed class Program
             else Console.WriteLine("Вас нет в списке");
             Console.WriteLine();
         }
-    }
 
+        #if DEBUG
+            Console.WriteLine("\nНажмите любую клавишу чтобы выйти...");
+            Console.ReadKey();
+        #else
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Console.WriteLine("\nНажмите любую клавишу для выхода...");
+                Console.ReadKey();
+            }
+        #endif
+    }
 }
