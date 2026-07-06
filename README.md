@@ -38,3 +38,4 @@
 2. Распакуйте скачанный релиз
 3. Запустите программу
 
+![Предварительный просмотр](https://raw.githubusercontent.com/AscendedAngel/ITMOScrapper/refs/heads/assets/demo.png)
