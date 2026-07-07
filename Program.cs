@@ -1,4 +1,5 @@
 ﻿using VuzScrapper.Scrappers;
+using System.Runtime.InteropServices;
 
 namespace VuzScrapper;
 
