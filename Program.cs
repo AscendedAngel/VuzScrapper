@@ -1,48 +1,34 @@
-﻿using System.Net;
-using System.Runtime.InteropServices;
+﻿using ITMOScrapper.Scrappers;
 
 namespace ITMOScrapper;
 
 internal sealed class Program 
 {
-    private static void Main()
+    private async static Task Main()
     {
-        // #if DEBUG
-        // Console.WriteLine($"Текущая конфигурация: Debug");
-        // #else
-        // Console.WriteLine($"Текущая конфигурация: Release");
-        // #endif
-
         string[] links = [
             "https://abit.itmo.ru/rating/bachelor/budget/2340",
             "https://abit.itmo.ru/rating/bachelor/budget/2342",
             "https://abit.itmo.ru/rating/bachelor/budget/2339",
             "https://abit.itmo.ru/rating/bachelor/budget/2334"];
 
-        var results = RequestParser.MakeRequests(links);
+        IRequestParser itmoScrapper = new ItmoScrapper();
 
-        if (results.Any(x => x.StatusCode != HttpStatusCode.OK)) 
+        var competition = await itmoScrapper.CreateCompetition(links);
+
+        if (competition is null)
         {
-            Console.WriteLine("There is an error, not HTTP200OK");
-            var errors = results.Where(x => x.StatusCode != HttpStatusCode.OK);
-            foreach (var error in errors) 
+            foreach (var error in itmoScrapper.Errors) 
             {
                 Console.Error.WriteLine($"{error.RequestMessage} - {error.StatusCode}");
             }
             return;
         }
 
-        var competition = new Competition();
-
-        foreach (var result in results)
-        {
-            competition.CompetitionLists.Add(RequestParser.CreateCompetitionList(result, competition.Candidates));
-        }
-
-        Console.Write("Введите ваш ID абитуриента: ");
-        var myId = Console.ReadLine();
-
         CompetitionResolver.Resolve(competition);
+
+        Console.Write("\nВведите ваш ID абитуриента: ");
+        var myId = Console.ReadLine();
 
         foreach (var list in competition.CompetitionLists)
         {
@@ -74,7 +60,7 @@ internal sealed class Program
         #else
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Console.WriteLine("\nНажмите любую клавишу для выхода...");
+                Console.Write("\nНажмите любую клавишу для выхода...");
                 Console.ReadKey();
             }
         #endif
