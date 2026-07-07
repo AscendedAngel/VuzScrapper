@@ -1,6 +1,6 @@
-﻿using ITMOScrapper.Scrappers;
+﻿using VuzScrapper.Scrappers;
 
-namespace ITMOScrapper;
+namespace VuzScrapper;
 
 internal sealed class Program 
 {

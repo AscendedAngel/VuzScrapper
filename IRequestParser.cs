@@ -1,4 +1,4 @@
-namespace ITMOScrapper;
+namespace VuzScrapper;
 
 interface IRequestParser
 {
