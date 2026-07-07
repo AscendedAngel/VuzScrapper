@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 
-namespace ITMOScrapper;
+namespace VuzScrapper;
 
 internal static partial class RequestParser
 {
