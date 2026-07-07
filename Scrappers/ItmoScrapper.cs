@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 
-namespace ITMOScrapper.Scrappers;
+namespace VuzScrapper.Scrappers;
 
 internal sealed partial class ItmoScrapper : IRequestParser
 {
