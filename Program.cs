@@ -7,30 +7,17 @@ namespace VuzScrapper;
 
 internal sealed class Program 
 {
-    private static async Task Main()
+    private static IEnumerable<IRequestParser> GetScrappers()
     {
-        IRequestParser itmoScrapper = new ItmoScrapper();
-        IRequestParser spbguScrapper = new SpbguScrapper();
+        yield return new ItmoScrapper();
+        yield return new SpbguScrapper();
+    }
 
-        var competition = await spbguScrapper.CreateCompetition();
-
-        if (competition is null)
-        {
-            foreach (var error in spbguScrapper.Errors) 
-            {
-                await Console.Error.WriteLineAsync($"{error.RequestMessage} - {error.StatusCode}");
-            }
-            return;
-        }
-
-
-        Console.Write("\nВведите ваш ID абитуриента: ");
-        var myId = Console.ReadLine()!;
-        CompetitionResolver.Resolve(competition, new Applicant { Code = myId });
-
+    private static void OutputResult(Competition competition, Applicant applicant)
+    {
         foreach (var list in competition.CompetitionLists)
         {
-            var currentPlace = list.Students.FindIndex(x => x.Code == myId);
+            var currentPlace = list.Students.FindIndex(x => x.Code == applicant.Code);
             if (currentPlace == -1)
             {
                 continue;
@@ -54,6 +41,54 @@ internal sealed class Program
             Console.WriteLine($"{name} |\nВсего {list.Places} мест, из которых {examPlaces} - общий конкурс");
             Console.WriteLine($"Вы находитесь на {currentPlace + 1} месте ({type}; Приоритет - №{priority})\n");
         }
+    }
+
+    private static IRequestParser AskForScrapper()
+    {
+        var scrappers = GetScrappers().ToArray();
+
+        Console.WriteLine("\nВыберите ВУЗ:");
+
+        foreach (var (index, value) in scrappers.Select((value, index) => (index, value)))
+        {
+            Console.WriteLine($"{index+1}. {value.Name}");
+        }
+
+        Console.WriteLine();
+
+        var chosen = -1;
+
+        do
+        {
+            Console.Write("Выберите номер ВУЗа: ");
+            if (!int.TryParse(Console.ReadLine(), out chosen) || !(chosen > 0 && chosen <= scrappers.Length)) continue;
+            break;
+        } while (true);
+
+        return scrappers[chosen - 1];
+    }
+
+    private static async Task Main()
+    { 
+        var scrapper = AskForScrapper();
+        var competition = await scrapper.CreateCompetition();
+
+        if (competition is null)
+        {
+            foreach (var error in scrapper.Errors) 
+            {
+                await Console.Error.WriteLineAsync($"{error.RequestMessage} - {error.StatusCode}");
+            }
+            return;
+        }
+
+        Console.Write("\nВведите ваш ID абитуриента: ");
+        var myId = Console.ReadLine()!;
+        var applicant = new Applicant { Code = myId };
+        CompetitionResolver.Resolve(competition, applicant);
+
+        OutputResult(competition, applicant);
+
 
         #if DEBUG
             Console.WriteLine("\nНажмите любую клавишу чтобы выйти...");
