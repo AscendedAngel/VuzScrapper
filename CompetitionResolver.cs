@@ -14,7 +14,7 @@ internal static class CompetitionResolver
         public List<Applicant> Applicants { get; set; } = [];
     }
 
-    private static void Recycle(List<ApplicantGroupByType> groups, Competition competition)
+    private static void Recycle(List<ApplicantGroupByType> groups, Competition competition, Applicant recycleFor)
     {
         var ignoreId = new List<string>();
 
@@ -54,6 +54,9 @@ internal static class CompetitionResolver
 
                 foreach (var request in candidate.Applicants)
                 {
+                    if (request.ApplicantType == ApplicantType.Target && request.Code != recycleFor.Code) continue;
+                    if (request.ApplicantType == ApplicantType.Special && request.Code != recycleFor.Code) continue;
+                    if (request.ApplicantType == ApplicantType.Separate && request.Code != recycleFor.Code) continue;
                     var currentList = competition.CompetitionLists.First(x => x.Name == request.Program);
                     currentList.Students.Add(request);
                 }
@@ -64,7 +67,7 @@ internal static class CompetitionResolver
         }
     }
 
-    public static void Resolve(Competition competition) 
+    public static void Resolve(Competition competition, Applicant recycleFor) 
     {
         var result = competition.Candidates
             .OrderBy(x => x.ApplicantType)
@@ -82,6 +85,6 @@ internal static class CompetitionResolver
                     }).ToList()
             }).ToList();
 
-        Recycle(result, competition);
+        Recycle(result, competition, recycleFor);
     }
 }

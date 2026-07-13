@@ -4,16 +4,19 @@ using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 
-namespace VuzScrapper.Scrappers;
+namespace VuzScrapper.Scrappers.Itmo;
 
 internal sealed partial class ItmoScrapper : IRequestParser
 {
+    public string Name => "ФГАОУ ВО \"НИУ ИТМО\"";
+    
     public List<HttpResponseMessage> Errors { get; set; } = [];
-    private Competition? _competition = null;
+    private Competition? _competition;
 
-
-    public async Task<Competition?> CreateCompetition(IEnumerable<string> links)
+    public async Task<Competition?> CreateCompetition()
     {
+        var links = await LinksReader.Read("Scrappers/Itmo/links.txt");
+        
         Console.WriteLine("Читаем конкурсные списки ВУЗа...");
 
         var results = (await MakeRequests(links)).ToList();
@@ -103,11 +106,11 @@ internal sealed partial class ItmoScrapper : IRequestParser
         foreach (var regexResult in regexResults) 
         {
             var groups = ((Match)regexResult).Groups;
-
-            if (string.IsNullOrEmpty(groups[^1].Value)) competitionList.Places = int.Parse(groups[1].Value);
+            
             if (groups[^1].Value == "ЦК") competitionList.TargetedQuota = int.Parse(groups[1].Value);
-            if (groups[^1].Value == "ОcК") competitionList.SpecialQuota = int.Parse(groups[1].Value);
-            if (groups[^1].Value == "ОтК") competitionList.SeparateQuota = int.Parse(groups[1].Value);
+            else if (groups[^1].Value == "ОcК") competitionList.SpecialQuota = int.Parse(groups[1].Value);
+            else if (groups[^1].Value == "ОтК") competitionList.SeparateQuota = int.Parse(groups[1].Value);
+            else competitionList.Places = int.Parse(groups[1].Value);
         }
     }
 

@@ -11,4 +11,16 @@
     <PackageReference Include="AngleSharp" Version="1.5.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Scrappers\Spbgu\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Scrappers\Itmo\links.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Scrappers\Spbgu\links.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

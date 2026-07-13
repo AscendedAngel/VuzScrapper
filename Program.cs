@@ -1,44 +1,42 @@
 ﻿using VuzScrapper.Scrappers;
 using System.Runtime.InteropServices;
+using VuzScrapper.Scrappers.Spbgu;
+using VuzScrapper.Scrappers.Itmo;
 
 namespace VuzScrapper;
 
 internal sealed class Program 
 {
-    private async static Task Main()
+    private static async Task Main()
     {
-        string[] links = [
-            "https://abit.itmo.ru/rating/bachelor/budget/2340",
-            "https://abit.itmo.ru/rating/bachelor/budget/2342",
-            "https://abit.itmo.ru/rating/bachelor/budget/2339",
-            "https://abit.itmo.ru/rating/bachelor/budget/2334"];
-
         IRequestParser itmoScrapper = new ItmoScrapper();
+        IRequestParser spbguScrapper = new SpbguScrapper();
 
-        var competition = await itmoScrapper.CreateCompetition(links);
+        var competition = await spbguScrapper.CreateCompetition();
 
         if (competition is null)
         {
-            foreach (var error in itmoScrapper.Errors) 
+            foreach (var error in spbguScrapper.Errors) 
             {
-                Console.Error.WriteLine($"{error.RequestMessage} - {error.StatusCode}");
+                await Console.Error.WriteLineAsync($"{error.RequestMessage} - {error.StatusCode}");
             }
             return;
         }
 
-        CompetitionResolver.Resolve(competition);
 
         Console.Write("\nВведите ваш ID абитуриента: ");
-        var myId = Console.ReadLine();
+        var myId = Console.ReadLine()!;
+        CompetitionResolver.Resolve(competition, new Applicant { Code = myId });
 
         foreach (var list in competition.CompetitionLists)
         {
-            var name = list.Name;
-            var places = list.Places;
-            var examPlaces = places - (list.TargetedQuota + list.SpecialQuota + list.SeparateQuota + list.Students.Count(x => x.ApplicantType == ApplicantType.Olympiad));
-
             var currentPlace = list.Students.FindIndex(x => x.Code == myId);
-            var type = currentPlace > -1 ? list.Students[currentPlace].ApplicantType switch 
+            if (currentPlace == -1)
+            {
+                continue;
+            }
+            
+            var type = list.Students[currentPlace].ApplicantType switch 
             {
                 ApplicantType.Olympiad => "Олимпиада",
                 ApplicantType.Target => "Целевая квота",
@@ -46,13 +44,15 @@ internal sealed class Program
                 ApplicantType.Separate => "Отдельная квота",
                 ApplicantType.Common => "Общий конкурс",
                 _ => "*неизвестная ошибка*"
-            } : null;
+            };
+            
+            var name = list.Name;
+            var places = list.Places;
+            var priority = list.Students[currentPlace].ProgramPriority;
+            var examPlaces = places - (list.TargetedQuota + list.SpecialQuota + list.SeparateQuota + list.Students.Count(x => x.ApplicantType == ApplicantType.Olympiad));
 
             Console.WriteLine($"{name} |\nВсего {list.Places} мест, из которых {examPlaces} - общий конкурс");
-
-            if (currentPlace > -1) Console.WriteLine($"Вы находитесь на {currentPlace + 1} месте ({type})");
-            else Console.WriteLine("Вас нет в списке");
-            Console.WriteLine();
+            Console.WriteLine($"Вы находитесь на {currentPlace + 1} месте ({type}; Приоритет - №{priority})\n");
         }
 
         #if DEBUG
