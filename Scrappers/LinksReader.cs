@@ -8,7 +8,7 @@ public partial class LinksReader
     {
         var lines = await File.ReadAllLinesAsync(filePath);
         return lines
-            .Where(x => !string.IsNullOrWhiteSpace(x) && !x.Trim().StartsWith("#"))
+            .Where(x => !string.IsNullOrWhiteSpace(x) && !x.Trim().StartsWith('#'))
             .Select(x => CommentRegex().Replace(x, "").Trim());
     }
 

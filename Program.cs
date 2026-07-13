@@ -7,10 +7,12 @@ namespace VuzScrapper;
 
 internal sealed class Program 
 {
+    private static HttpClientWrapper _wrapper = null!;
+
     private static IEnumerable<IRequestParser> GetScrappers()
     {
-        yield return new ItmoScrapper();
-        yield return new SpbguScrapper();
+        yield return new ItmoScrapper(_wrapper);
+        yield return new SpbguScrapper(_wrapper);
     }
 
     private static void OutputResult(Competition competition, Applicant applicant)
@@ -70,17 +72,20 @@ internal sealed class Program
 
     private static async Task Main()
     { 
+        _wrapper = new HttpClientWrapper();
         var scrapper = AskForScrapper();
-        var competition = await scrapper.CreateCompetition();
+        var competitionResult = await scrapper.CreateCompetition();
 
-        if (competition is null)
+        if (competitionResult.IsFailure)
         {
-            foreach (var error in scrapper.Errors) 
+            foreach (var error in competitionResult.Error) 
             {
                 await Console.Error.WriteLineAsync($"{error.RequestMessage} - {error.StatusCode}");
             }
             return;
         }
+
+        var competition = competitionResult.Value;
 
         Console.Write("\nВведите ваш ID абитуриента: ");
         var myId = Console.ReadLine()!;
