@@ -1,0 +1,5 @@
+# Список ссылок на рейтинги в ИТМО
+https://abit.itmo.ru/rating/bachelor/budget/2334 # 01.03.02 «Прикладная математика и информатика»
+https://abit.itmo.ru/rating/bachelor/budget/2339 # 09.03.01 «Информатика и вычислительная техника»
+https://abit.itmo.ru/rating/bachelor/budget/2340 # 09.03.02 «Информационные системы и технологии»
+https://abit.itmo.ru/rating/bachelor/budget/2342 # 09.03.04 «Программная инженерия»

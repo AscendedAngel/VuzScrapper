@@ -1,65 +1,15 @@
 using System.Collections.Concurrent;
-using System.Net;
 using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 
-namespace VuzScrapper.Scrappers;
+namespace VuzScrapper.Scrappers.Itmo;
 
-internal sealed partial class ItmoScrapper : IRequestParser
+internal sealed partial class ItmoParser
 {
-    public List<HttpResponseMessage> Errors { get; set; } = [];
-    private Competition? _competition = null;
-
-
-    public async Task<Competition?> CreateCompetition(IEnumerable<string> links)
+    public async Task<(CompetitionList CompetitionList, List<Applicant> Candidates)> CreateCompetitionList(HttpResponseMessage response) 
     {
-        Console.WriteLine("Читаем конкурсные списки ВУЗа...");
-
-        var results = (await MakeRequests(links)).ToList();
-        Errors.AddRange(results.Where(x => x.StatusCode != HttpStatusCode.OK));
-        if (Errors.Count != 0) return _competition;
-
-        _competition = new Competition();
-        var tasks = new List<Task<CompetitionList>>();
-        var bag = new ConcurrentBag<Applicant>();
-
-        Console.WriteLine("Составляем симуляцию конкурсных списков...");
-        foreach (var page in results)
-        {
-            var task = Task.Run(() => CreateCompetitionList(page, bag));
-            tasks.Add(task);
-            await Task.Delay(500);
-        }
-
-        await Task.WhenAll(tasks);
-
-        _competition.CompetitionLists.AddRange(tasks.Select(x => x.Result));
-        _competition.Candidates.AddRange([..bag]);
-
-        return _competition;
-    }
-
-    #region Private Implementation
-
-    private async Task<IEnumerable<HttpResponseMessage>> MakeRequests(IEnumerable<string> links) 
-    {
-        var client = new HttpClient();
-        var tasks = new List<Task<HttpResponseMessage>>();
-
-        foreach (var link in links) 
-        {
-            tasks.Add(client.GetAsync(link));
-        }
-
-        await Task.WhenAll(tasks);
-
-        return tasks.Select(x => x.Result);
-    }
-
-    private static CompetitionList CreateCompetitionList(HttpResponseMessage response, ConcurrentBag<Applicant> candidates) 
-    {
-        var content = response.Content.ReadAsStringAsync().Result;
+        var content = await response.Content.ReadAsStringAsync();
 
         var parser = new HtmlParser();
         var document = parser.ParseDocument(content);
@@ -87,13 +37,15 @@ internal sealed partial class ItmoScrapper : IRequestParser
         var separates = subcompetitions[2 + offset];
         var common = subcompetitions[3 + offset];
 
+        var candidates = new List<Applicant>();
+
         FillCandidates(olympiads, programName, candidates, ApplicantType.Olympiad);
         if (offset == 1) FillCandidates(targets, programName, candidates, ApplicantType.Target);
         FillCandidates(specials, programName, candidates, ApplicantType.Special);
         FillCandidates(separates, programName, candidates, ApplicantType.Separate);
         FillCandidates(common, programName, candidates, ApplicantType.Common);
 
-        return competitionList;
+        return (competitionList, candidates);
     }
 
     private static void FillPlacesInfo(CompetitionList competitionList, string infoText) 
@@ -103,15 +55,15 @@ internal sealed partial class ItmoScrapper : IRequestParser
         foreach (var regexResult in regexResults) 
         {
             var groups = ((Match)regexResult).Groups;
-
-            if (string.IsNullOrEmpty(groups[^1].Value)) competitionList.Places = int.Parse(groups[1].Value);
+            
             if (groups[^1].Value == "ЦК") competitionList.TargetedQuota = int.Parse(groups[1].Value);
-            if (groups[^1].Value == "ОcК") competitionList.SpecialQuota = int.Parse(groups[1].Value);
-            if (groups[^1].Value == "ОтК") competitionList.SeparateQuota = int.Parse(groups[1].Value);
+            else if (groups[^1].Value == "ОcК") competitionList.SpecialQuota = int.Parse(groups[1].Value);
+            else if (groups[^1].Value == "ОтК") competitionList.SeparateQuota = int.Parse(groups[1].Value);
+            else competitionList.Places = int.Parse(groups[1].Value);
         }
     }
 
-    private static void FillCandidates(IElement element, string competitionListName, ConcurrentBag<Applicant> candidates, ApplicantType applicantType = ApplicantType.Common)
+    private static void FillCandidates(IElement element, string competitionListName, List<Applicant> candidates, ApplicantType applicantType = ApplicantType.Common)
     {
         foreach (var target in element.QuerySelectorAll("div[class^=RatingPage_table__item__]"))
         {
@@ -135,8 +87,6 @@ internal sealed partial class ItmoScrapper : IRequestParser
         }
     }
 
-    #endregion
-
     #region Regexes
 
     [GeneratedRegex(@"(\d+)\s([а-яА-Яa-zA-Z]+)?")]
@@ -155,5 +105,4 @@ internal sealed partial class ItmoScrapper : IRequestParser
     private static partial Regex ExamRegex();
     
     #endregion
-
 }
