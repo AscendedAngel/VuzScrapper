@@ -7,7 +7,7 @@
 
 ## 📌 Возможности
 
-- Парсинг нескольких конкурсных списков (направлений) с сайта [abit.itmo.ru](https://abit.itmo.ru).
+- Парсинг нескольких конкурсных списков (направлений) с сайта [abit.itmo.ru](https://abit.itmo.ru), а также [enrollelists.spbu.ru](https://enrollelists.spbu.ru/reports/PriemList02.php?mode=filter&education_level_sort_order=1).
 - Учёт **всех квот**:
     - олимпиадники (БВИ)
     - целевая квота (ЦК)
