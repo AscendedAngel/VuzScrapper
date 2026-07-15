@@ -71,7 +71,7 @@ internal sealed class Program
     }
 
     private static async Task Main()
-    { 
+    {
         _wrapper = new HttpClientWrapper();
         var scrapper = AskForScrapper();
         var competitionResult = await scrapper.CreateCompetition();
