@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;

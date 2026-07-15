@@ -1,6 +1,6 @@
-namespace VuzScrapper.Scrappers.Itmo;
+namespace VuzScrapper.Scrappers.Common;
 
-internal sealed class ItmoAnimation : IAsyncDisposable
+internal sealed class AnimationService : IAsyncDisposable
 {
     private readonly Lock _lock = new();
     private bool _isDisposed;

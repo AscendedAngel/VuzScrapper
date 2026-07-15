@@ -1,4 +1,4 @@
-namespace VuzScrapper.Scrappers;
+namespace VuzScrapper.Scrappers.Common;
 
 interface IRequestParser
 {

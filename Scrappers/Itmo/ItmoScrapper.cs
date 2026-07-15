@@ -1,3 +1,5 @@
+using VuzScrapper.Scrappers.Common;
+
 namespace VuzScrapper.Scrappers.Itmo;
 
 internal sealed class ItmoScrapper(HttpClientWrapper client) : IRequestParser
@@ -9,9 +11,7 @@ internal sealed class ItmoScrapper(HttpClientWrapper client) : IRequestParser
 
     public async Task<Result<Competition, List<HttpResponseMessage>>> CreateCompetition()
     {
-        await using var animation = new ItmoAnimation();
-        var someRes = Result<Competition, List<HttpResponseMessage>>.Success(new Competition());
-
+        await using var animation = new AnimationService();
         var links = await LinksReader.Read("Scrappers/Itmo/links.txt");
         
         //Console.WriteLine("Читаем конкурсные списки ВУЗа...");

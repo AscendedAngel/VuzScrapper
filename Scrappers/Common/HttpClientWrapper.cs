@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
 
+namespace VuzScrapper.Scrappers.Common;
+
 internal sealed class HttpClientWrapper : IDisposable
 {
     private readonly HttpClient _client;

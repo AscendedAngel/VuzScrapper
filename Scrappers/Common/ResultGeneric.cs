@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 
+namespace VuzScrapper.Scrappers.Common;
+
 internal sealed record Result<TValue, TError>
 {
     public TValue? Value { get; set; }

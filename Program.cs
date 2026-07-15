@@ -1,5 +1,4 @@
-﻿using VuzScrapper.Scrappers;
-using System.Runtime.InteropServices;
+﻿using VuzScrapper.Scrappers.Common;
 using VuzScrapper.Scrappers.Spbgu;
 using VuzScrapper.Scrappers.Itmo;
 

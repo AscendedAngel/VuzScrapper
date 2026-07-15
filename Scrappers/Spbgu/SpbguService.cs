@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+using VuzScrapper.Scrappers.Common;
 
 namespace VuzScrapper.Scrappers.Spbgu;
 

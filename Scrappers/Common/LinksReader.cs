@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace VuzScrapper.Scrappers;
+namespace VuzScrapper.Scrappers.Common;
 
 public partial class LinksReader
 {
