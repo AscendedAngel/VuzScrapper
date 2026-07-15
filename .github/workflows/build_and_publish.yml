@@ -55,6 +55,26 @@ jobs:
         uses: actions/download-artifact@v4
         with: 
           path: ./artifacts
+      
+      - name: Archive Linux Artifacts
+        run: tar -cf ./artifacts/VuzScrapper-linux-x64.tar ./artifacts/VuzScrapper-linux-x64/* && gzip ./artifacts/VuzScrapper-linux-x64.tar -9
+        
+      - name: Archive Windows Artifacts
+        run: zip -r ./artifacts/VuzScrapper-win-x64.zip ./artifacts/VuzScrapper-win-x64/* -9
 
       - name: List Files
         run: ls -R ./artifacts
+        
+      - name: Publish Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release (${{ github.ref_name }})
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            ./artifacts/VuzScrapper-linux-x64.tar.gz
+            ./artifacts/VuzScrapper-win-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
