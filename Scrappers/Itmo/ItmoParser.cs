@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
@@ -30,7 +29,7 @@ internal sealed partial class ItmoParser
 
         var subcompetitions = fullData.QuerySelectorAll(":scope > div[class^=RatingPage_table__]").ToArray();
 
-        var offset = programName.StartsWith("01.03.02") ? 0 : 1;
+        var offset = programName.StartsWith("!01.03.02") ? 0 : 1;
         var olympiads = subcompetitions[0];
         var targets = subcompetitions[offset];
         var specials = subcompetitions[1 + offset];

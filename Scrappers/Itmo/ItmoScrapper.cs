@@ -1,8 +1,8 @@
-using System.Collections.Concurrent;
+using VuzScrapper.Scrappers.Common;
 
 namespace VuzScrapper.Scrappers.Itmo;
 
-internal sealed partial class ItmoScrapper(HttpClientWrapper client) : IRequestParser
+internal sealed class ItmoScrapper(HttpClientWrapper client) : IRequestParser
 {
     public string Name => "ФГАОУ ВО \"НИУ ИТМО\"";
 
@@ -11,11 +11,11 @@ internal sealed partial class ItmoScrapper(HttpClientWrapper client) : IRequestP
 
     public async Task<Result<Competition, List<HttpResponseMessage>>> CreateCompetition()
     {
-        var someRes = Result<Competition, List<HttpResponseMessage>>.Success(new Competition());
-
+        await using var animation = new AnimationService();
         var links = await LinksReader.Read("Scrappers/Itmo/links.txt");
         
-        Console.WriteLine("Читаем конкурсные списки ВУЗа...");
+        //Console.WriteLine("Читаем конкурсные списки ВУЗа...");
+        await animation.Animate("Читаем конкурсные списки ВУЗа");
 
         var results = (await _itmoRequester.MakeRequests(links)).ToList();
 
@@ -26,12 +26,15 @@ internal sealed partial class ItmoScrapper(HttpClientWrapper client) : IRequestP
 
         var competition = new Competition();
 
-        Console.WriteLine("Составляем симуляцию конкурсных списков...");
+        //Console.WriteLine("Составляем симуляцию конкурсных списков...");
+        await animation.Animate("Составляем симуляцию конкурсных списков");
 
         var parserResults = await Task.WhenAll(from page in results select _itmoParser.CreateCompetitionList(page));
 
         competition.CompetitionLists.AddRange(parserResults.Select(x => x.CompetitionList));
         competition.Candidates.AddRange([..parserResults.SelectMany(x => x.Candidates)]);
+        
+        await animation.Stop();
 
         return Result<Competition, List<HttpResponseMessage>>.Success(competition);
     }

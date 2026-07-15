@@ -1,3 +1,5 @@
+using VuzScrapper.Scrappers.Common;
+
 namespace VuzScrapper.Scrappers.Itmo;
 
 internal sealed class ItmoRequester(HttpClientWrapper client)

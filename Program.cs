@@ -1,5 +1,4 @@
-﻿using VuzScrapper.Scrappers;
-using System.Runtime.InteropServices;
+﻿using VuzScrapper.Scrappers.Common;
 using VuzScrapper.Scrappers.Spbgu;
 using VuzScrapper.Scrappers.Itmo;
 
@@ -71,7 +70,7 @@ internal sealed class Program
     }
 
     private static async Task Main()
-    { 
+    {
         _wrapper = new HttpClientWrapper();
         var scrapper = AskForScrapper();
         var competitionResult = await scrapper.CreateCompetition();

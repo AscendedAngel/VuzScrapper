@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+using VuzScrapper.Scrappers.Common;
 
 namespace VuzScrapper.Scrappers.Spbgu;
 
@@ -19,13 +19,14 @@ internal sealed class SpbguScrapper : IRequestParser
 
     public async Task<Result<Competition, List<HttpResponseMessage>>> CreateCompetition()
     {
-        
+        await using var animation = new AnimationService();
         var links = await LinksReader.Read("Scrappers/Spbgu/links.txt");
 
         var competition = new Competition();
 
-        Console.WriteLine("Читаем конкурсные списки ВУЗа...");
-
+        // Console.WriteLine("Читаем конкурсные списки ВУЗа...");
+        await animation.Animate("Читаем конкурсные списки ВУЗа");
+        
         var results = await Task.WhenAll(from link in links select _unnamed.ProceedCompetitionList(link));
         if (results.Any(x => x.IsFailure))
         {
@@ -39,12 +40,15 @@ internal sealed class SpbguScrapper : IRequestParser
 
         var resultsData = results.Select(x => x.Value);
 
-        Console.WriteLine("Составляем симуляцию конкурсных списков...");
+        // Console.WriteLine("Составляем симуляцию конкурсных списков...");
+        await animation.Animate("Составляем симуляцию конкурсных списков...");
 
         competition.CompetitionLists = [..resultsData.Select(x => x.CompetitionList)];
         var candidates = resultsData.SelectMany(x => x.Lists).SelectMany(x => x);
 
         competition.Candidates = [..candidates];
+
+        await animation.Stop();
 
         return Result<Competition, List<HttpResponseMessage>>.Success(competition);
     }

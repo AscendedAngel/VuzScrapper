@@ -1,4 +1,4 @@
-using System.Net;
+using VuzScrapper.Scrappers.Common;
 
 namespace VuzScrapper.Scrappers.Spbgu;
 
