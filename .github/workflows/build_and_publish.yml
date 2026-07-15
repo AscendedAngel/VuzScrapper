@@ -1,0 +1,60 @@
+name: Build and Publish .NET Project
+
+on:
+  push:
+    tags: [ "v*" ]
+
+jobs:
+  build:
+    strategy: 
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest" ]
+        include:
+          - os: "ubuntu-latest"
+            runtime: "linux-x64"
+          - os: "windows-latest"
+            runtime: "win-x64"
+            
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 1
+        
+      - name: Setup Dotnet SDK
+        uses: actions/setup-dotnet@v4
+        with: 
+          dotnet-version: '10.0.x'
+          
+      - name: Restore .NET Project
+        run: dotnet restore -r ${{ matrix.runtime }}
+        
+      - name: Publish .NET Project for ${{ matrix.runtime }}
+        run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained --no-restore -o ./publish/VuzScrapper-${{ matrix.runtime }}
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: VuzScrapper-${{ matrix.runtime }}
+          path: ./publish/VuzScrapper-${{ matrix.runtime }}
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 1
+          
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with: 
+          path: ./artifacts
+
+      - name: List Files
+        run: ls -R ./artifacts
