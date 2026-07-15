@@ -32,7 +32,7 @@ jobs:
         run: dotnet restore -r ${{ matrix.runtime }}
         
       - name: Publish .NET Project for ${{ matrix.runtime }}
-        run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained --no-restore -o ./publish/VuzScrapper-${{ matrix.runtime }}
+        run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained --no-restore -o ./publish/VuzScrapper-${{ matrix.runtime }} -p:PublishSingleFile=true
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -57,10 +57,17 @@ jobs:
           path: ./artifacts
       
       - name: Archive Linux Artifacts
-        run: tar -cf ./artifacts/VuzScrapper-linux-x64.tar ./artifacts/VuzScrapper-linux-x64/* && gzip ./artifacts/VuzScrapper-linux-x64.tar -9
+        run: |
+          cd ./artifacts/VuzScrapper-linux-x64
+          tar -cf ../VuzScrapper-linux-x64.tar *
+          gzip ../VuzScrapper-linux-x64.tar -9
+          cd -
         
       - name: Archive Windows Artifacts
-        run: zip -r ./artifacts/VuzScrapper-win-x64.zip ./artifacts/VuzScrapper-win-x64/* -9
+        run: |
+          cd ./artifacts/VuzScrapper-win-x64
+          zip -r ../VuzScrapper-win-x64.zip * -9
+          cd -
 
       - name: List Files
         run: ls -R ./artifacts
